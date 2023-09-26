@@ -1,0 +1,60 @@
+# 도메인으로 인증서 만료일을 계산할수있으나 업무특성상 실제 인증서파일 자체를 모니터링하기위해 작성
+
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from datetime import datetime
+import os
+import smtplib
+from email.mime.text import MIMEText
+
+
+
+def get_expires_in_days(cert):                      # 함수 정의 (cert)
+    expires_date = cert.not_valid_after             # 만료일 attribute > expires_date 변수에 할당
+    expires = (expires_date - datetime.now()).days  # 만료일과 현재 날짜의 시간차 계산
+    return expires # return
+
+
+def send_email(to_address, subject, body):      # 구글보안설정에서 보안수준이 낮은 앱 허용
+    from_address = ''  # 보내는 이메일 주소
+    password = ''                   # 이메일 비밀번호
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = from_address
+    msg['To'] = to_address
+
+    server = smtplib.SMTP('', 587)  # SMTP 서버 설정 (gmail 사용)
+    server.starttls()
+    server.login(from_address, password)
+    server.sendmail(from_address, to_address, msg.as_string())
+    server.quit()
+
+
+# 디렉터리 경로 설정 (인증서 파일 저장할 위치)
+certificates_directory = r'C:\Users\admin\Desktop\인증서저장소'
+
+# 보낼 주소 설정
+to_address = ''
+
+# 디렉터리 내의 모든 파일을 확인하고 인증서인 경우 정보 출력
+for filename in os.listdir(certificates_directory): # 해당 디렉토리 내의 파일 목록 가져옴
+    if filename.endswith(('.crt', '.pem')):         # .crt 또는 .pem 확장자인 경우 pfx 등 다른형식도 추가가능
+        full_path = os.path.join(certificates_directory, filename) # 전체경로 만들기
+        with open(full_path, 'rb') as cert_file:    # 바이너리모드로 파일 열기
+            cert_data = cert_file.read()            # 파일 내용을 읽어 cert_data 에 저장
+            cert = x509.load_pem_x509_certificate(cert_data, default_backend()) # pem 형식 변환
+
+            expires = get_expires_in_days(cert)     #인증서 만료일 계산
+            print(f"인증서 파일: {filename}")
+            print(f"인증서 이름: {cert.subject}")
+            print(f"만료일까지 남은 날짜: {expires}일")
+
+            if expires <= 30:
+                subject = f"인증서 만료 알림: {filename}"
+                body = f"인증서 이름: {cert.subject}\n만료일까지 {expires}일 남았습니다."
+                send_email(to_address, subject, body)
+
+                print(f"만료 30일 이내인 인증서로 메일을 보냈습니다.")
+
+            print("=" * 30)
