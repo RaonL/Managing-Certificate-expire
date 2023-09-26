@@ -15,9 +15,9 @@ def get_expires_in_days(cert):                      # 함수 정의 (cert)
     return expires # return
 
 
-def send_email(to_address, subject, body):      # 구글보안설정에서 보안수준이 낮은 앱 허용
-    from_address = ''  # 보내는 이메일 주소
-    password = ''                   # 이메일 비밀번호
+def send_email(to_address, subject, body):  # 구글보안설정에서 보안수준이 낮은 앱 허용
+    from_address = ''                       # 보내는 이메일 주소
+    password = ''                           # 이메일 비밀번호
 
     msg = MIMEText(body)
     msg['Subject'] = subject
