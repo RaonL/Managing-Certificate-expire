@@ -49,9 +49,9 @@ def alert_issues(issues):
 
 if __name__ == "__main__":
     # 사용자 입력 변수
-    adc_ip = "10.10.11.211"
+    adc_ip = ""
     username = "nsroot"
-    password = "N@mu70331"
+    password = ""
 
     stats = fetch_ns_stats(adc_ip, username, password)
     if stats:
