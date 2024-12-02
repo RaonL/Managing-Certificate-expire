@@ -85,9 +85,9 @@ def find_recent_backup(backup_list, hours=24):
 # 메인 실행 부분
 if __name__ == "__main__":
     # Citrix ADC 정보
-    adc_ip = "10.10.11.211"
+    adc_ip = ""
     username = "nsroot"
-    password = "N@mu70331"
+    password = ""
 
     # 1. 새로운 백업 생성
     backup_name = create_backup(adc_ip, username, password)
